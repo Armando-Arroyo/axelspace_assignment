@@ -4,8 +4,7 @@ from typing import Dict
 def make_km_table(pattern: str) -> Dict[str, int]:
     table = dict()
     for value, char in enumerate(pattern):
-        table.update({f'{char}': value})
-    # raise Exception("TODO")
+        table[char] = value
     return table
 
 
@@ -17,7 +16,11 @@ class Bm(object):
 
     def decide_slide_width(self, c: str) -> int:
         assert len(c) == 1
-        return self.table[c]
+        c_idx = self.table[c]
+        if c_idx < len(self.text):
+            slide = len(self.pattern)-self.table[c]
+        return slide
+        # return self.table[c]
 
     def search(self) -> int:
         pattern = self.pattern
@@ -29,15 +32,18 @@ class Bm(object):
         for i in range(t_len):
             if text[i] not in km_table:
                 km_table[text[i]] = -1
-        shift = 0
-        while shift <= t_len-p_len:
+        slide = 0
+        while slide <= t_len-p_len:
             j = p_len - 1
-            while j >= 0 and pattern[j] == text[shift+j]:
+            while j >= 0 and pattern[j] == text[slide+j]:
                 j -= 1
             if j < 0:
-                pos = shift
+                pos = slide
                 positions.append(pos)
-                shift += (p_len-self.decide_slide_width(text[shift+p_len]) if shift+p_len < t_len else 1)
+                try:
+                    slide += self.decide_slide_width(text[slide+p_len])
+                except Exception:
+                    slide = 1
             else:
-                shift += max(1, j-self.decide_slide_width(text[shift+j]))
+                slide += max(j-km_table[text[slide+j]], 1)
         return positions[0] if positions else -1
