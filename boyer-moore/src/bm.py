@@ -2,6 +2,8 @@ from typing import Dict
 
 
 def make_km_table(pattern: str) -> Dict[str, int]:
+    """This function creates a dict with the pattern characters as keys and
+    whose values are the position of the character in the pattern"""
     table = dict()
     for value, char in enumerate(pattern):
         table[char] = value
@@ -19,10 +21,14 @@ class Bm(object):
         c_idx = self.table[c]
         if c_idx < len(self.text):
             slide = len(self.pattern)-self.table[c]
+        # else:
+            # slide = 1
         return slide
         # return self.table[c]
 
     def search(self) -> int:
+        """The search implements the bad character rule to preprocess
+        the text."""
         pattern = self.pattern
         text = self.text
         p_len = len(pattern)
@@ -38,6 +44,7 @@ class Bm(object):
             while j >= 0 and pattern[j] == text[slide+j]:
                 j -= 1
             if j < 0:
+                # this means a pattern has been found
                 pos = slide
                 positions.append(pos)
                 try:
@@ -46,4 +53,7 @@ class Bm(object):
                     slide = 1
             else:
                 slide += max(j-km_table[text[slide+j]], 1)
+        """if the pattern appears more that once, in principle this search
+        should be able to return every ocurrence, but for simplicity it only
+        returns the first one, thus the positions[0]"""
         return positions[0] if positions else -1
